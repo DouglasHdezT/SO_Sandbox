@@ -21,6 +21,16 @@ void signals(){
     signal(SIGHUP, handle_sighup);
     signal(SIGINT, handle_sighup);
     signal(SIGQUIT, handle_sighup);
+
+    //25 - 32
+    signal(SIGXFSZ, handle_sighup);
+    signal(SIGVTALRM, handle_sighup);
+    signal(SIGPROF, handle_sighup);
+    signal(SIGWINCH, handle_sighup);
+    signal(SIGIO, handle_sighup);
+    signal(SIGPWR, handle_sighup);
+    signal(SIGSYS, handle_sighup);
+    signal(SIGRTMIN, handle_sighup);
 }
 
 int main(int argc, char* argv[]) 

@@ -1,26 +1,60 @@
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-/* typedef struct Node{
-    Node* sig;
-    char* value;
-} Node; */
+typedef struct Node{
+    struct Node* sig;
+    int value;
+} Node;
 
 static volatile sig_atomic_t sig_caught = 0;
+Node* QPointer = NULL;
 
-void handle_sighup(int signum){
-    /* in case we registered this handler for multiple signals */ 
-    if (signum == SIGHUP) {
-        sig_caught = 1;
+/*
+    List handler
+*/
+
+Node* createNode(int signal){
+    Node* n= (Node*) malloc(sizeof(Node));
+    n->value = signal;
+    n->sig = NULL;
+}
+
+void push(Node* node){
+    if(QPointer == NULL){
+        QPointer = node;
+    }else{
+        Node* aux = QPointer;
+        while(aux->sig != NULL){
+            aux = aux->sig;
+        }
+
+        aux->sig = node;
+    }
+}
+
+void printList(){
+    while(aux->sig != NULL){
+        printf("%d->", aux->value);    
+        aux = aux->sig;
     }
 
-    printf("%d\n", signum);
+    printf("FIN\n");
+}
+
+void handle_sighup(int signum){
+    push(createNode(signum));
 }
 
 void signals(){
     signal(SIGHUP, handle_sighup);
     signal(SIGINT, handle_sighup);
     signal(SIGQUIT, handle_sighup);
+    signal(SIGILL, handle_sighup);
+    signal(SIGTRAP, handle_sighup);
+    signal(SIGABRT, handle_sighup);
+    signal(SIGBUS, handle_sighup);
+    signal(SIGFPE, handle_sighup);
 }
 
 int main(int argc, char* argv[]) 

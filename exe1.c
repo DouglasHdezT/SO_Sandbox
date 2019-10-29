@@ -4,10 +4,12 @@
 #include <sys/wait.h>
 
 int main(){
+    int n=0;
+    printf("Ingrese la cantidad de maxima de procesos: ");
+    scanf("%d", &n);
+    printf("PID: %d \n",getpid());
     
-    printf("%d \n",getpid());
     
-    int n = 2;
     for (int i = 0; i < n; i++)
     {
         int child1 = fork(); //<- retornara > 0 en el papa
@@ -21,11 +23,11 @@ int main(){
             for(int j = 0 ; j <= i;j++){
                 printf("\t");    
             }
-            printf("%d \n",getppid());
+            printf("PID: %d \n",getppid());
             for(int j = 0 ; j <= i;j++){
                 printf("\t");    
             }
-            printf("%d \n",getpid());
+            printf("PID: %d \n",getpid());
         }
     }
     

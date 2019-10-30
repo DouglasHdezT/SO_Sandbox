@@ -1,69 +1,94 @@
 #include <unistd.h> 
 #include <stdio.h> 
-#include <stdlib.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
-#include<pthread.h>
 
-pthread_mutex_t lock;
+int step = 1;
+int ppid = getpid();
+int n;
+int *head;
+void handle_sighup(int signum){
+    
+    if(signum == 4){
+        //printf("Soy una senal de: %d\n", getpid());
+        return;
+    }
+    if(signum == 5){
+        //printf("Soy el tata con una senal de: %d\n", getpid());
+        return;
+    }
+    if(signum==2){
+        step = step * -1;
+    }
+    if(signum==15){
+        if(ppid == getpid){
+            kill(*head,9);
+            head++;
+        }
+        exit(0);
+    }
+}
+
 
 
 int main(){
-    int n=12;
-    int* ppos= (int*) malloc(sizeof(int));
-    int pipi = getpid();
-    int  cpid=0, cpos=-1;
-    *ppos = 0; 
+    signal(SIGTRAP, handle_sighup);
+    signal(SIGILL, handle_sighup);
+    signal(SIGTERM, handle_sighup);
+    signal(SIGINT, handle_sighup);
+    
+    n=4;
+    pid_t pids[n];
+    head = &pids[0];
+    
+    int child = -1;
+    for(int i=0;i<n;i++){
+        child = fork();
+        if(child > 0){
+            pids[i] = child;
 
-    for (int i = 0; i < n; i++)
-    {
-       int child=fork();
-       if(child==0){
-            cpid=getpid();
-            cpos=i;
-            printf("%d ppos: %p\n", cpos, ppos);
+        }
+        if(child==0){
+            cpos = i;
+            pause();
             break;
         }
-        if(pipi == getpid()){
-            wait(NULL);
-
-        }
-
     }
-    if(pipi == getpid()){
-    }else{
-        while(1){
-            if(*ppos == cpos){
-                printf("Soy el hijo %d: %d \n",cpos,getpid());
-                *ppos=*ppos +1;
-                printf("%d\n", *ppos);
-                if(*ppos == n){
-                    *ppos=0;
-                }
-                break;
-            }
-            
-        }
-    }
-
     
 
-    /* while(1){
-        if(getpid()!=pipi){
-            printf("Soy el hijo %d \n",getpid());
+    int cont = 0;
+
+    while(1){
+
+        if(ppid== getpid()){
+            kill(pids[cont], 4);
+            //pause();
+            
+            for (long i = 0; i < 300000000; i++){
+                
+            }
+
+            cont=cont + step;
+
+            if(cont >= n){
+                cont = 0;
+            }
+            if(cont <0 ){
+                cont = n-1;
+            }
+
+            
+            
+            
+        }else{
+            printf("soy el hijo %d: %d\n", cpos,getpid());
+            kill(getppid(), 5);
+            pause();
         }
-    } */
-    /* int child=fork();
-    int child2=-1;
-    if(child>0){
-        child2=fork();
+            
     }
-    if(child==0){
-        printf("Soy el hijo 1 %d \n",getpid());
-    }
-    if(child2==0){
-        printf("Soy el hijo 2 %d \n",getpid());
-    } */
+
     
     return 0;
+    
 }

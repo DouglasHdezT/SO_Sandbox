@@ -11,7 +11,6 @@ pthread_mutex_t lock;
 int main(){
     int n=12;
     int* ppos= (int*) malloc(sizeof(int));
-    int pids[n]; 
     int pipi = getpid();
     int  cpid=0, cpos=-1;
     *ppos = 0; 
@@ -20,9 +19,9 @@ int main(){
     {
        int child=fork();
        if(child==0){
-            pids[i] = getpid();
             cpid=getpid();
             cpos=i;
+            printf("%d ppos: %p\n", cpos, ppos);
             break;
         }
         if(pipi == getpid()){
@@ -32,21 +31,22 @@ int main(){
 
     }
     if(pipi == getpid()){
-        for(int i = 0; i < n; i++){
-            printf("%d ->", pids[i]);
+    }else{
+        while(1){
+            if(*ppos == cpos){
+                printf("Soy el hijo %d: %d \n",cpos,getpid());
+                *ppos=*ppos +1;
+                printf("%d\n", *ppos);
+                if(*ppos == n){
+                    *ppos=0;
+                }
+                break;
+            }
+            
         }
     }
 
-    while(1){
-        printf("%d\n", cpos);
-        if(*ppos == cpos){
-            printf("Soy el hijo %d: %d \n",*ppos,getpid());
-            *ppos++;
-            if(*ppos == n){
-                *ppos=0;
-            }
-        }
-    }
+    
 
     /* while(1){
         if(getpid()!=pipi){

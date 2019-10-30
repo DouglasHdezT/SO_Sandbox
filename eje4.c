@@ -2,11 +2,15 @@
 #include <stdio.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdlib.h>
+#define N  4
 
 int step = 1;
-int ppid = getpid();
-int n;
-int *head;
+int ppid = -1;
+
+int n=4;
+pid_t pids[N];
+
 void handle_sighup(int signum){
     
     if(signum == 4){
@@ -21,11 +25,11 @@ void handle_sighup(int signum){
         step = step * -1;
     }
     if(signum==15){
-        if(ppid == getpid){
-            kill(*head,9);
-            head++;
-        }
-        exit(0);
+       for(int i=0;i<sizeof(pids)/sizeof(pids[0]);i++){
+            kill(pids[i],9);
+       }
+       exit(0);
+        
     }
 }
 
@@ -37,9 +41,9 @@ int main(){
     signal(SIGTERM, handle_sighup);
     signal(SIGINT, handle_sighup);
     
-    n=4;
-    pid_t pids[n];
-    head = &pids[0];
+    ppid=getpid();
+
+    int cpos = -1;
     
     int child = -1;
     for(int i=0;i<n;i++){

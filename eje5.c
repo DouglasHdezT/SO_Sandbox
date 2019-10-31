@@ -10,6 +10,7 @@ pthread_t tids[N];
 int n = N;
 int gCont=0;
 
+int step = 1;
 
 typedef struct myThread{
 	pthread_t* tid;
@@ -28,10 +29,10 @@ void handle_sighup(int signum){
         return;
     }
     if(signum==2){
-		printf("Entro aqui, me despause"); 
+		step = step * -1;
     }
     if(signum==15){
-
+       exit(0);
     }
 }
 
@@ -40,8 +41,9 @@ void *myThreadFun(void *vargp)
     // Store the value argument passed to this thread 
     while(1){
 		pause();
-		printf("Soy el hilo %d con el tid: %ld \n",pthread_self,((MT*)vargp)->index);
-		pause();
+		sleep(2);	
+		printf("Soy el hilo %d con el tid: %ld \n",((MT*)vargp)->index,pthread_self());
+		kill(getpid(),4);
 	}
 } 
 
@@ -51,9 +53,6 @@ int main(){
     signal(SIGTERM, handle_sighup);
     signal(SIGINT, handle_sighup);
     
-	
-	
-    int child;
     
     for(int i=0;i<n;i++){
         pthread_t tid; 
@@ -65,12 +64,18 @@ int main(){
             
     }
     
-    
+    /*for(int i =0;i<N;i++){
+    	printf("%ld \n",tids[i]);
+    }*/
     while(1){
     	pthread_kill(tids[gCont], 4);
-    	gCont++;
+    	pause();
+    	gCont = gCont + step;
     	if(gCont == N){
     		gCont =0;
+    	}
+    	if(gCont < 0){
+    		gCont =N-1;
     	}
     }
 

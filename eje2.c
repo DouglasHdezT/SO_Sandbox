@@ -1,31 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-long *factorial(long n){
-    long *result=(long*)malloc(1*sizeof(long));
-    long i =1, f=1;
-    while(i<=n){
-       f=f*i;
-       i=i+1; 
-    }
-    result[0] = f;
-    printf("El factorial de %ld es %ld\n",n,f);
-    return result;
+
+int valorRet;
+int child; 
+int ppid = -1;
+
+int fxFactorial(int num){
+   
+   child = fork();
+   if(child==0){
+   	 if(num == 0){
+   	 	return 1;
+   	 }else{
+   	 	return fxFactorial(num-1)*num; 
+   	 }
+   }
+   if(child>0){
+   	 wait(&valorRet);
+	 return(valorRet+1);
+   }
+   
+   
 }
-void *factorial_(void *args){
-    long n = *((long*)args);
-    return (void*)factorial(n);
-}
-int main(int args, char **argv){
-    long n = 0;
-    //long m = 10;
-    printf("Ingrese un numero: ");
-    scanf("%ld",&n);
-    pthread_t thread[1];
-    pthread_create(&thread[0],NULL,factorial_,&n);
-    //pthread_create(&thread[1],NULL,factorial,&m);
-    pthread_join(thread[0],NULL);
-    //pthread_join(thread[1],NULL);
-    return 0;
+ 
+int main(){
+  int num;
+  int ppid = getpid();
+  printf("Ingresa un numero para calcular su factorial : ");
+  scanf("%d",&num);
+  printf("------\n");
+  
+  int fac = fxFactorial(num);
+
+  
+  
+  if(child==0){
+  	printf("El factorial es: %d \n",fac);
+  }
+  
+  return 0;
 }

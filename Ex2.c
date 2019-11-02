@@ -1,64 +1,46 @@
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
-#include<sys/wait.h> 
+#include <sys/types.h>
+#include <sys/wait.h>
 
 
-typedef struct Node{
-    struct Node* sig;
-    int value;
-    char* tabs; 
-} Node;
+int valorRet;
+int child; 
+int ppid = -1;
 
-Node* QPointer = NULL;
-
-Node* createNode(int signal, char* tabs){
-    Node* n= (Node*) malloc(sizeof(Node));
-    n->value = signal;
-    n->tabs = tabs;
-    n->sig = NULL;
+int fxFactorial(int num){
+   
+   child = fork();
+   if(child==0){
+   	 if(num == 0){
+   	 	return 1;
+   	 }else{
+   	 	return fxFactorial(num-1)*num; 
+   	 }
+   }
+   if(child>0){
+   	 wait(&valorRet);
+	 return(valorRet+1);
+   }
+   
+   
 }
+ 
+int main(){
+  int num;
+  int ppid = getpid();
+  printf("Ingresa un numero para calcular su factorial : ");
+  scanf("%d",&num);
+  printf("------\n");
+  
+  int fac = fxFactorial(num);
 
-void push(Node* node){
-    if(QPointer == NULL){
-        QPointer = node;
-    }else{
-        Node* aux = QPointer;
-        while(aux->sig != NULL){
-            aux = aux->sig;
-        }
-
-        aux->sig = node;
-    }
-}
-
-void printList(){
-    Node* aux = QPointer;
-    while(aux != NULL){
-        printf("%s%d\n",aux->tabs, aux->value);    
-        aux = aux->sig;
-    }
-    printf("---------\n");
-    }
-
-int main()
-{
-    int N = 2;
-    char tabs[N];
-
-    push(createNode(getpid(), ""));
-
-    for(int i=0; i<N; i++){
-        if(fork()){
-            strcat(tabs, "\t");
-            push(createNode(getpid(), tabs));
-        }
-        
-    }
-    wait(NULL);
-    printList();
-    free(QPointer);
-
-    return 0;
+  
+  
+  if(child==0){
+  	printf("El factorial es: %d \n",fac);
+  }
+  
+  return 0;
 }
